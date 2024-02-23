@@ -85,7 +85,7 @@ public class Menu {
                     break;
                 case 4:
                     System.out.println("All Cities:");
-                    for (City city : DatabaseManager.getAllCities()) {
+                    for (City city : DatabaseManager.getAllcities()) {
                         System.out.println(city);
                     }
                     break;
@@ -149,7 +149,7 @@ public class Menu {
                     break;
                 case 2:
                     System.out.println("All City Histories:");
-                    for (CityHistory cth : DatabaseManager.getAllHistoryCities()) {
+                    for (CityHistory cth : DatabaseManager.getAllHistorycities()) {
                         System.out.println(cth);
                     }
                     break;
@@ -175,15 +175,15 @@ public class Menu {
                 case 5:
                     System.out.println("Enter the id of the city history to search: ");
                     int cityidToSearch = new Scanner(System.in).nextInt();
-                    CityHistory selectedCity = DatabaseManager.getCityHistoryById(cityidToSearch);
+                    DatabaseManager.getCityHistoryById(cityidToSearch);
 
-                    if (selectedCity != null) {
-                        for (CityHistory cth : DatabaseManager.getAllHistoryCities()) {
-                            System.out.println(cth);
-                        }
-                    } else {
-                        System.out.println("City history not found.");
-                    }
+//                    if (selectedCity != null) {
+//                        for (CityHistory cth : DatabaseManager.getAllHistoryCities()) {
+//                            System.out.println(cth);
+//                        }
+//                    } else {
+//                        System.out.println("City history not found.");
+//                    }
                     break;
                 case 6:
                     System.out.println("Exit");
