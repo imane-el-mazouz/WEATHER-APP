@@ -81,11 +81,14 @@ public class DatabaseManager {
      }
 
      public static void updateCity(City city) throws SQLException {
-          String sql = "UPDATE City SET cityName = ? WHERE cityId = ?";
+          String sql = "UPDATE city SET cityName = ?, currentTemperature = ?, currentHumidity = ?, currentWindSpeed = ? WHERE cityId = ?";
           Connection connection = getConnection();
           PreparedStatement statement = connection.prepareStatement(sql);
           statement.setString(1, city.getCityName());
-          statement.setInt(2, city.getCityId());
+          statement.setInt(2, city.getCurrentTemperature());
+          statement.setInt(3, city.getCurrentHumidity());
+          statement.setInt(4, city.getCurrentWindSpeed());
+          statement.setInt(5, city.getCityId());
           statement.executeUpdate();
           connection.close();
           statement.close();
@@ -108,14 +111,13 @@ public class DatabaseManager {
           PreparedStatement statement = connection.prepareStatement(sql);
           statement.setString(1, cityName);
           ResultSet resultSet = statement.executeQuery();
-          City city = null;
+          City city = new City();
           if (resultSet.next()) {
-               int id = resultSet.getInt("cityId");
-               String name = resultSet.getString("cityName");
-               int temp = resultSet.getInt("currentTemperature");
-               int hm = resultSet.getInt("currentHumidity");
-               int wind = resultSet.getInt("currentWindSpeed");
-               city = new City();
+               city.setCityId(resultSet.getInt("cityId"));
+               city.setCityName(resultSet.getString("cityName"));
+               city.setCurrentTemperature(resultSet.getInt("currentTemperature"));
+               city.setCurrentHumidity(resultSet.getInt("currentHumidity"));
+               city.setCurrentWindSpeed(resultSet.getInt("currentWindSpeed"));
           }
 
           connection.close();
