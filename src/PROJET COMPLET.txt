@@ -1,0 +1,573 @@
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Scanner;
+
+
+public class Main {
+    public static void main(String[] args) throws SQLException {
+        Menu.MenuPrincipal();
+    }
+}
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+class City {
+    private int cityId;
+    private String cityName;
+    private int currentTemperature;
+    private int currentHumidity;
+    private int currentWindSpeed;
+
+    public City(int cityId, String cityName, int currentTemperature, int currentHumidity, int currentWindSpeed) {
+        this.cityId = cityId;
+        this.cityName = cityName;
+        this.currentTemperature = currentTemperature;
+        this.currentHumidity = currentHumidity;
+        this.currentWindSpeed = currentWindSpeed;
+    }
+
+    public City() {
+    }
+
+    public int getCityId() {
+        return cityId;
+    }
+
+    public String getCityName() {
+        return cityName;
+    }
+
+    public int getCurrentTemperature() {
+        return currentTemperature;
+    }
+
+    public int getCurrentHumidity() {
+        return currentHumidity;
+    }
+
+    public int getCurrentWindSpeed() {
+        return currentWindSpeed;
+    }
+
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
+    }
+
+    public void setCityName(String cityName) {
+        this.cityName = cityName;
+    }
+
+    public void setCurrentTemperature(int currentTemperature) {
+        this.currentTemperature = currentTemperature;
+    }
+
+    public void setCurrentHumidity(int currentHumidity) {
+        this.currentHumidity = currentHumidity;
+    }
+
+    public void setCurrentWindSpeed(int currentWindSpeed) {
+        this.currentWindSpeed = currentWindSpeed;
+    }
+
+    @Override
+    public String toString() {
+        return "City{" +
+                "cityId=" + cityId +
+                ", cityName='" + cityName + '\'' +
+                ", currentTemperature=" + currentTemperature +
+                ", currentHumidity=" + currentHumidity +
+                ", currentWindSpeed=" + currentWindSpeed +
+                '}';
+    }
+} import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
+
+public class CityHistory {
+    private int historicalDataId;
+    private int cityId;
+    private String eventDate;
+    private int temperature;
+
+    // Constructor
+    public CityHistory(int historicalDataId, int cityId, String eventDate, int temperature) {
+        this.historicalDataId = historicalDataId;
+        this.cityId = cityId;
+        this.eventDate = eventDate;
+        this.temperature = temperature;
+    }
+
+    public CityHistory() {
+    }
+
+    public CityHistory(int historicalDataId, int cityId, LocalDate eventDate, int temp) {
+    }
+    //getters
+
+    public int getHistoricalDataId() {
+        return historicalDataId;
+    }
+
+    public int getCityId() {
+        return cityId;
+    }
+
+    public String getEventDate() {
+        return eventDate;
+    }
+
+    public int getTemperature() {
+        return temperature;
+    }
+
+    //setters
+    public void setHistoricalDataId(int historicalDataId) {
+        this.historicalDataId = historicalDataId;
+    }
+
+    public void setCityId(int cityId) {
+        this.cityId = cityId;
+    }
+
+    public void setEventDate(String eventDate) {
+        this.eventDate = eventDate;
+    }
+
+    public void setTemperature(int temperature) {
+        this.temperature = temperature;
+    }
+
+    @Override
+    public String toString() {
+        return "CityHistory{" +
+                "historicalDataId=" + historicalDataId +
+                ", cityId=" + cityId +
+                ", eventDate='" + eventDate + '\'' +
+                ", temperature=" + temperature +
+                '}';
+    }
+} import java.sql.*;
+import java.time.LocalDate;
+import java.util.*;
+public class DatabaseManager {
+     private static final String URL = "jdbc:mysql://localhost/meteo";
+     private static final String USERNAME = "imane";
+     private static final String PASSWORD = "1234";
+
+
+
+     public static Connection getConnection() throws SQLException {
+          return DriverManager.getConnection(URL, USERNAME, PASSWORD);
+     }
+
+     public static List<City> getAllcities() throws SQLException {
+          List<City> cities = new ArrayList<>();
+          String sql = "SELECT * FROM City";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(sql);
+          ResultSet resultSet = statement.executeQuery();
+          while (resultSet.next()) {
+               City city = new City();
+               city.setCityId(resultSet.getInt("cityId"));
+               city.setCityName(resultSet.getString("cityName"));
+               city.setCurrentTemperature(resultSet.getInt("currentTemperature"));
+               city.setCurrentHumidity(resultSet.getInt("currentHumidity"));
+               city.setCurrentWindSpeed(resultSet.getInt("currentWindSpeed"));
+               cities.add(city);
+          }
+          connection.close();
+          statement.close();
+          resultSet.close();
+          return cities;
+     }
+
+     public static List<CityHistory> getAllHistorycities() throws SQLException {
+          List<CityHistory> cityHistories = new ArrayList<>();
+          String sql = "SELECT * FROM CityHistory";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(sql);
+          ResultSet resultSet = statement.executeQuery();
+          while (resultSet.next()) {
+               int historicalDataId = resultSet.getInt("historicalDataId");
+               int cityId = resultSet.getInt("cityId");
+               String eventDate = resultSet.getString("eventDate");
+               int temperature = resultSet.getInt("temperature");
+               cityHistories.add(new CityHistory(historicalDataId, cityId, eventDate, temperature));
+          }
+          connection.close();
+          statement.close();
+          resultSet.close();
+          return cityHistories;
+     }
+
+
+     public static void addCity(City city) throws SQLException {
+          String sql = "INSERT INTO City(cityName, cityId, currentTemperature, currentHumidity, currentWindSpeed) VALUES (?, ?, ?, ?, ?)";
+          try {
+               Connection connection = getConnection();
+               PreparedStatement statement = connection.prepareStatement(sql);
+               statement.setString(1, city.getCityName());
+               statement.setInt(2, city.getCityId());
+               statement.setInt(3, city.getCurrentTemperature());
+               statement.setInt(4, city.getCurrentHumidity());
+               statement.setInt(5, city.getCurrentWindSpeed());
+               statement.executeUpdate();
+               connection.close();
+               statement.close();
+               System.out.println("The city is added successfully!");
+          } catch (SQLException e) {
+               e.printStackTrace();
+          }
+     }
+
+
+     public ResultSet readAllCities() throws SQLException {
+          Connection connection = getConnection();
+          String query = "SELECT * FROM city ";
+          PreparedStatement statement = connection.prepareStatement(query);
+          return statement.executeQuery();
+     }
+
+     public static void updateCity(City city) throws SQLException {
+          String sql = "UPDATE city SET cityName = ?, currentTemperature = ?, currentHumidity = ?, currentWindSpeed = ? WHERE cityId = ?";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(sql);
+          statement.setString(1, city.getCityName());
+          statement.setInt(2, city.getCurrentTemperature());
+          statement.setInt(3, city.getCurrentHumidity());
+          statement.setInt(4, city.getCurrentWindSpeed());
+          statement.setInt(5, city.getCityId());
+          statement.executeUpdate();
+          connection.close();
+          statement.close();
+          System.out.println("the city is updated successfully!");
+     }
+
+     public static void deleteCity(int cityId) throws SQLException {
+          String sql = "DELETE FROM City WHERE cityId = ?";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(sql);
+          statement.setInt(1, cityId);
+          statement.executeUpdate();
+          connection.close();
+          statement.close();
+          System.out.println("City deleted successfully!");
+     }
+
+     public static City getCityByName(String cityName) throws SQLException {
+          String sql = "SELECT * FROM City WHERE cityName = ?";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(sql);
+          statement.setString(1, cityName);
+          ResultSet resultSet = statement.executeQuery();
+          City city = new City();
+          if (resultSet.next()) {
+               city.setCityId(resultSet.getInt("cityId"));
+               city.setCityName(resultSet.getString("cityName"));
+               city.setCurrentTemperature(resultSet.getInt("currentTemperature"));
+               city.setCurrentHumidity(resultSet.getInt("currentHumidity"));
+               city.setCurrentWindSpeed(resultSet.getInt("currentWindSpeed"));
+          }
+          connection.close();
+          return city;
+     }
+
+
+     public static void addCityHistory(CityHistory cityHistory) throws SQLException {
+          String query = "INSERT INTO cityhistory (historicalDataId, cityId, eventDate, temperature) VALUES (?, ?, ?, ?)";
+          try {
+               Connection connection = getConnection();
+               PreparedStatement statement = connection.prepareStatement(query);
+               statement.setInt(1, cityHistory.getHistoricalDataId());
+               statement.setInt(2, cityHistory.getCityId());
+               statement.setString(3, cityHistory.getEventDate());
+               statement.setInt(4, cityHistory.getTemperature());
+               statement.executeUpdate();
+               connection.close();
+               statement.close();
+               connection.close();
+               System.out.println("The city is added successfully!");
+          } catch (SQLException e) {
+               e.printStackTrace();
+          }
+     }
+
+     public ResultSet readAllHistoryForCity(int cityId) throws SQLException {
+          Connection connection = getConnection();
+          String query = "SELECT * FROM cityhistory";
+          PreparedStatement statement = connection.prepareStatement(query);
+          return statement.executeQuery();
+     }
+
+     public static void updateCityHistory(CityHistory cityHistory) throws SQLException {
+          String query = "UPDATE cityhistory SET eventDate = ?, temperature = ? WHERE historicalDataId = ?";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(query);
+          statement.setString(1, cityHistory.getEventDate());
+          statement.setInt(2, cityHistory.getTemperature());
+          statement.setInt(3, cityHistory.getHistoricalDataId());
+          statement.executeUpdate();
+          connection.close();
+          statement.close();
+          connection.close();
+          System.out.println("the cityHistory is updated successfully!");
+     }
+
+     public static void deleteCityHistory(int historicalDataId) throws SQLException {
+          String query = "DELETE FROM cityhistory WHERE historicalDataId = ?";
+          Connection connection = getConnection();
+          PreparedStatement statement = connection.prepareStatement(query);
+          statement.setInt(1, historicalDataId);
+          statement.executeUpdate();
+          connection.close();
+          statement.close();
+          System.out.println("The history of this city is deleted");
+     }
+
+public static CityHistory getCityHistoryById(int id_h) throws SQLException {
+     String sql = "SELECT * FROM City ,CityHistory WHERE City.cityId = ?";
+     Connection connection = getConnection();
+     PreparedStatement statement = connection.prepareStatement(sql);
+     statement.setInt(1, id_h);
+     ResultSet resultSet = statement.executeQuery();
+     CityHistory city_h = null;
+     if (resultSet.next()) {
+          int historicalDataId = resultSet.getInt("historicalDataId");
+          int cityId = resultSet.getInt("cityId");
+          int temp = resultSet.getInt("temperature");
+          LocalDate eventDate = resultSet.getDate("eventDate").toLocalDate();
+          city_h = new CityHistory(historicalDataId, cityId, eventDate, temp);
+     }
+     connection.close();
+     return city_h;
+}
+}
+
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Scanner;
+
+public class Menu {
+    public static void MenuPrincipal() throws SQLException {
+        int choiceofMain;
+
+        do {
+            System.out.println("PRINCIPAL MENU ");
+            System.out.println("1 -MENU OF CITY");
+            System.out.println("2 -MENU OF CITY HISTORY");
+            System.out.println("EXIT ..");
+            System.out.print("ENTER YOUR CHOICE ");
+            choiceofMain = new Scanner(System.in).nextInt();
+            switch (choiceofMain) {
+                case 1:
+                    cityMenu();
+                    break;
+                case 2:
+                    cityHistoryMenu();
+                    break;
+                case 3:
+                    System.out.println("exit ");
+                    break;
+                default:
+                    System.out.println("invalid choice ");
+                    break;
+            }
+        } while (choiceofMain != 3);
+    }
+
+    public static void cityMenu() throws SQLException {
+        Scanner scanner = new Scanner(System.in);
+        int choice, cityId, currentTemperature, currentHumidity, currentWindSpeed;
+        String cityName;
+
+        do {
+            System.out.println("Menu of the City");
+            System.out.println("1. Add City ");
+            System.out.println("2. Update City ");
+            System.out.println("3. Delete City  ");
+            System.out.println("4. Read All Cities");
+            System.out.println("5. get city by name");
+            System.out.println("6. Quit");
+            System.out.println("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline
+
+            switch (choice) {
+                case 1:
+                    System.out.print("ID : ");
+                    cityId = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    System.out.print("NAME : ");
+                    cityName = scanner.nextLine();
+                    System.out.print("Current Temperature : ");
+                    currentTemperature = scanner.nextInt();
+                    System.out.print("Current Humidity : ");
+                    currentHumidity = scanner.nextInt();
+                    System.out.print("Current WindSpeed : ");
+                    currentWindSpeed = scanner.nextInt();
+                    System.out.println("city added successfully ");
+                    DatabaseManager.addCity(new City(cityId, cityName, currentTemperature, currentHumidity, currentWindSpeed));
+                    break;
+                case 2:
+                    System.out.print("Enter City ID to update: ");
+                    cityId = scanner.nextInt();
+                    scanner.nextLine(); // Consume newline
+                    System.out.print("NAME : ");
+                    cityName = scanner.nextLine();
+                    System.out.print("Current Temperature : ");
+                    currentTemperature = scanner.nextInt();
+                    System.out.print("Current Humidity : ");
+                    currentHumidity = scanner.nextInt();
+                    System.out.print("Current WindSpeed : ");
+                    currentWindSpeed = scanner.nextInt();
+                    DatabaseManager.updateCity(new City(cityId, cityName, currentTemperature, currentHumidity, currentWindSpeed));
+                    break;
+                case 3:
+                    System.out.print("Enter ID of the city to delete: ");
+                    cityId = scanner.nextInt();
+                    DatabaseManager.deleteCity(cityId);
+                    break;
+                case 4:
+                    System.out.println("All Cities:");
+                    for (City city : DatabaseManager.getAllcities()) {
+                        System.out.println(city);
+                    }
+                    break;
+                case 5:
+                    System.out.print("Enter the name of the city to search: ");
+                    String cityNameToSearch = new Scanner(System.in).nextLine();
+                    City selectedCity = DatabaseManager.getCityByName(cityNameToSearch);
+
+                    if (selectedCity != null) {
+                        System.out.println("Selected City:");
+                        System.out.println("ID: " + selectedCity.getCityId());
+                        System.out.println("Name: " + selectedCity.getCityName());
+                        System.out.println("Temperature: " + selectedCity.getCurrentTemperature());
+                        System.out.println("Humidity: " + selectedCity.getCurrentHumidity());
+                        System.out.println("Wind Speed: " + selectedCity.getCurrentWindSpeed());
+                    } else {
+                        System.out.println("City not exists.");
+                    }
+                    break;
+                case 6:
+                    System.out.println("Exit");
+                    break;
+                default:
+                    System.out.println("invalid choice");
+                    break;
+            }
+        } while (choice != 6);
+        scanner.close();
+    }
+
+    public static void cityHistoryMenu() throws SQLException {
+        int option, historicalDataId, cityId, temperature;
+        String eventDateInput;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate eventDate;
+
+        Scanner scanner = new Scanner(System.in);
+        do {
+            System.out.println("Menu of the CityHistory");
+            System.out.println("1. Add City History");
+            System.out.println("2. Read All the History of the City");
+            System.out.println("3. Update City History");
+            System.out.println("4. Delete City History");
+            System.out.println("5. get city by ID");
+            System.out.println("6. Exit");
+            System.out.println("Enter your option: ");
+            option = scanner.nextInt();
+
+            switch (option) {
+                case 1:
+                    System.out.println("DataID : ");
+                    historicalDataId = scanner.nextInt();
+                    System.out.print("Temperature : ");
+                    temperature = scanner.nextInt();
+                    System.out.println("Enter event date (DD/MM/YYYY): ");
+                    eventDateInput = scanner.next();
+                    eventDate = LocalDate.parse(eventDateInput, formatter);
+                    System.out.println("City Id : ");
+                    cityId = scanner.nextInt();
+                    DatabaseManager.addCityHistory(new CityHistory(historicalDataId, cityId, eventDate.toString(), temperature));
+                    break;
+                case 2:
+                    System.out.println("All City Histories:");
+                    for (CityHistory cth : DatabaseManager.getAllHistorycities()) {
+                        System.out.println(cth);
+                    }
+                    break;
+
+                case 3:
+                    System.out.print("Enter Historical Data ID to update: ");
+                    historicalDataId = scanner.nextInt();
+                    System.out.print("Temperature : ");
+                    temperature = scanner.nextInt();
+                    System.out.println("Enter event date (DD/MM/YYYY): ");
+                    eventDateInput = scanner.next();
+                    eventDate = LocalDate.parse(eventDateInput, formatter);
+                    System.out.print("City Id : ");
+                    cityId = scanner.nextInt();
+                    DatabaseManager.updateCityHistory(new CityHistory(historicalDataId, cityId, eventDate.toString(), temperature));
+                    break;
+                case 4:
+                    System.out.print("Enter Historical Data ID to delete: ");
+                    historicalDataId = scanner.nextInt();
+                    DatabaseManager.deleteCityHistory(historicalDataId);
+                    break;
+
+                case 5:
+                    System.out.println("Enter the Id of the city history to search: ");
+                    int cityIdtosearch = new Scanner(System.in).nextInt();
+                    CityHistory selectedCity = DatabaseManager.getCityHistoryById(cityIdtosearch);
+                    if (selectedCity != null) {
+//                        System.out.println("Selected CityHistory:");
+//                        System.out.println("historicalDataId: " + selectedCityHistory.getHistoricalDataId());
+//                        System.out.println("ID: " + selectedCityHistory.getCityId());
+//                        System.out.println("eventDate: " + selectedCityHistory.getEventDate());
+//                        System.out.println("temperature: " + selectedCityHistory.getTemperature());
+                        for (CityHistory cth : DatabaseManager.getAllHistorycities()) {
+                            System.out.println(cth);
+                        }
+                    } else {
+                        System.out.println("City history not found.");
+                    }
+
+                    break;
+                case 6:
+                    System.out.println("Exit");
+                default:
+                    System.out.println("Invalid option");
+                    break;
+
+            }
+        }
+            while (option != 6) ;
+            scanner.close();
+
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
